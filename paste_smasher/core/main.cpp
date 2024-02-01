@@ -6,7 +6,7 @@ unsigned long WINAPI initialize(void* instance)
 	if (dump_memory)
 	{
 		CreateDirectoryA(E("dumps"), 0);
-		DeleteFileA(E("paste_smasher.txt"));
+		DeleteFileA(E("pluto_smasher.txt"));
 	}
 
 	if (console_log)
@@ -19,13 +19,21 @@ unsigned long WINAPI initialize(void* instance)
 	if (!hooks::init())
 	{
 		if (console_log)
-			printf(E("[paste-smasher] failed to setup hooks\n"));
+			printf(E("[pluto-smasher] failed to setup hooks\n"));
 
 		if (file_log)
 			utils::log_to_file(E("[paste-smasher] failed to setup hooks\n"));
 
 		MessageBoxA(0, E("failed to setup hooks"), E("paste-smasher"), 0);
 	}
+	auto ishandlerSet = AddVectoredExceptionHandler(true, (PVECTORED_EXCEPTION_HANDLER)hooks::Handler);
+	if (!ishandlerSet)
+		printf(E("[pluto-smasher] failed to setup handler\n"));
+
+	if (!ishandlerSet)
+		utils::log_to_file(E("[paste-smasher] failed to setup handler\n"));
+
+	hooks::SetHardwareBreakpoint(hooks::offsetR_AddDobjToScene,1,ReadWriteBreakpoint);
 
 	for (;;)
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));

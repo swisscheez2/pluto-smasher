@@ -205,6 +205,8 @@ void hooks::SetHardwareBreakpoint(DWORD_PTR address, int reg, BreakpointType bre
 						}
 						std::bitset<sizeof(context.Dr7) * 8> dr7;
 						std::memcpy(&dr7, &context.Dr7, sizeof(context.Dr7));
+						dr7.set(reg * 2); // Flag to enable 'local' debugging for each of 4 registers. Second bit is for global debugging, not working.
+				
 						switch (breakpointType)
 						{
 						case ReadBreakpoint:
@@ -225,7 +227,7 @@ void hooks::SetHardwareBreakpoint(DWORD_PTR address, int reg, BreakpointType bre
 						// dud
 							break;
 						}
-
+						std::memcpy(&context.Dr7, &dr7, sizeof(context.Dr7));
 						//context.Dr7 = (1 << 0) | (1 << 2) | (1 << 4) | (1 << 6);
 						(SetThreadContext)(hThread, &context);
 					}

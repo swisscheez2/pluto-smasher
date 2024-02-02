@@ -10,7 +10,7 @@ namespace utils
 	{
 		std::ofstream file;
 
-		file.open(E("paste_smasher.txt"), std::ios_base::app);
+		file.open(E("pluto_smasher.txt"), std::ios_base::app);
 
 		char arr[256] = { 0 };
 

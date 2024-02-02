@@ -22,7 +22,7 @@ namespace data
 namespace hooks
 {
 
-	constexpr auto offsetR_AddDobjToScene = 0x7269C9; // top of function  which was orig 0x48A950 , bottom 0x48A99A very bottom 0x48A9A3
+	constexpr auto offsetR_AddDobjToScene = 0x7269C9;
 
 	namespace nt_allocate_virtual_memory
 	{

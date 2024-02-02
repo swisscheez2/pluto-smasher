@@ -2,6 +2,7 @@
 #include <tlhelp32.h>
 #include <iostream>
 #include <dbghelp.h>
+#include <bitset>
 
 #pragma comment(lib, "DbgHelp.lib")
 
@@ -13,7 +14,8 @@ LONG CALLBACK hooks::Handler(EXCEPTION_POINTERS* pExceptionInfo)
 	{
 		CONTEXT* context = pExceptionInfo->ContextRecord;
 		DWORD dr6 = context->Dr6;
-
+		std::cout << "offsetR_AddDobjToScene:  triggered 0x" << std::hex << pExceptionInfo->ContextRecord->Eip << std::endl;
+		MessageBox(NULL, L"triggered handler",L"test", MB_OK);
 		// Check if DR0 hardware breakpoint was triggered (read or write)
 		if (dr6 & 0x1)
 		{
@@ -201,7 +203,8 @@ void hooks::SetHardwareBreakpoint(DWORD_PTR address, int reg, BreakpointType bre
 						case 3:
 							context.Dr3 = address; break;
 						}
-
+						std::bitset<sizeof(context.Dr7) * 8> dr7;
+						std::memcpy(&dr7, &context.Dr7, sizeof(context.Dr7));
 						switch (breakpointType)
 						{
 						case ReadBreakpoint:
@@ -214,14 +217,16 @@ void hooks::SetHardwareBreakpoint(DWORD_PTR address, int reg, BreakpointType bre
 							break;
 						case ReadWriteBreakpoint:
 							// Set breakpoints for read and write
-							context.Dr7 |= (3 << 16) | (1 << 18); // Set LEN0, LEN1, and RW0
+							//context.Dr7 |= (3 << 16) | (1 << 18); // Set LEN0, LEN1, and RW0
+							dr7.set(16 + reg * 4 + 1, true);
+							dr7.set(16 + reg * 4 , true);
 							break;
 						default:
 						// dud
 							break;
 						}
 
-						context.Dr7 = (1 << 0) | (1 << 2) | (1 << 4) | (1 << 6);
+						//context.Dr7 = (1 << 0) | (1 << 2) | (1 << 4) | (1 << 6);
 						(SetThreadContext)(hThread, &context);
 					}
 					(ResumeThread)(hThread);
